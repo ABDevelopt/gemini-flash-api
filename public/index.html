@@ -1,54 +1,779 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FitBot - AI Health Coach</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitBot — Konsultan Nutrisi & Kebugaran AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#1a1814; --paper:#f7f3ec; --paper2:#ede9e0;
+  --green:#1d7a55; --green-b:#22c97a; --green-p:#d4efe3;
+  --amber:#e8a020; --amber-p:#fdf3dc;
+  --coral:#d95f45; --coral-p:#fce8e3;
+  --muted:#7a7468; --border:rgba(26,24,20,.1);
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);overflow-x:hidden}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 56px;height:64px;background:rgba(247,243,236,.92);backdrop-filter:blur(18px);border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer}
+.logo-icon{width:32px;height:32px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.logo-text{font-family:var(--serif);font-size:21px;color:var(--ink);letter-spacing:-.3px}
+.logo-text em{color:var(--green);font-style:normal}
+.nav-links{display:flex;gap:28px;list-style:none}
+.nav-links li{font-size:13px;color:var(--muted);cursor:pointer;transition:color .2s;padding:4px 0}
+.nav-links li:hover,.nav-links li.active{color:var(--ink);border-bottom:1.5px solid var(--green)}
+.nav-cta{background:var(--green);color:#fff;border:none;border-radius:100px;padding:9px 22px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:background .2s}
+.nav-cta:hover{background:#155e3f}
+
+/* ── PAGE SYSTEM ── */
+.page{display:none;min-height:100vh;padding-top:64px}
+.page.active{display:block}
+
+/* ── HAMBURGER ── */
+.nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none}
+.nav-hamburger span{display:block;width:22px;height:2px;background:var(--ink);border-radius:2px;transition:all .25s}
+.nav-hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.nav-hamburger.open span:nth-child(2){opacity:0}
+.nav-hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.nav-mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:rgba(247,243,236,.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);z-index:199;flex-direction:column;padding:16px 24px 24px}
+.nav-mobile-menu.open{display:flex}
+.nav-mobile-item{font-size:16px;color:var(--muted);padding:12px 0;cursor:pointer;border-bottom:1px solid var(--border);transition:color .15s}
+.nav-mobile-item:hover,.nav-mobile-item.active{color:var(--ink)}
+.nav-mobile-cta{margin-top:16px;background:var(--green);color:#fff;border:none;border-radius:100px;padding:12px 24px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);width:100%}
+
+/* ═══════════════════════════════════════════
+   PAGE 1: LANDING
+═══════════════════════════════════════════ */
+.hero{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 64px)}
+.hero-l{display:flex;flex-direction:column;justify-content:center;padding:72px 56px 72px 80px;background:var(--paper)}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--green);letter-spacing:.08em;text-transform:uppercase;margin-bottom:28px}
+.eyebrow-dot{width:7px;height:7px;border-radius:50%;background:var(--green-b);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-l h1{font-family:var(--serif);font-size:clamp(40px,4.5vw,62px);line-height:1.08;letter-spacing:-1.5px;margin-bottom:22px}
+.hero-l h1 em{color:var(--green);font-style:italic}
+.hero-l h1 .hl{position:relative;display:inline-block}
+.hero-l h1 .hl::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--amber);border-radius:2px;animation:uline .8s .5s ease both}
+@keyframes uline{from{transform:scaleX(0);transform-origin:left}to{transform:scaleX(1);transform-origin:left}}
+.hero-desc{font-size:16px;font-weight:300;line-height:1.75;color:var(--muted);max-width:420px;margin-bottom:36px}
+.hero-search-box{background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:8px;box-shadow:0 4px 24px rgba(26,24,20,.07);transition:border-color .2s,box-shadow .2s}
+.hero-search-box:focus-within{border-color:var(--green);box-shadow:0 4px 24px rgba(29,122,85,.13)}
+.hero-search-row{display:flex;align-items:center;gap:10px;padding:4px 12px 8px 16px;border-bottom:1px solid var(--border);margin-bottom:10px}
+.hero-search-row svg{opacity:.35;flex-shrink:0}
+.hero-search-row input{flex:1;border:none;outline:none;font-family:var(--sans);font-size:14px;color:var(--ink);background:transparent}
+.hero-search-row input::placeholder{color:#bbb}
+.hero-search-btn{background:var(--green);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:background .2s;white-space:nowrap}
+.hero-search-btn:hover{background:#155e3f}
+.chip-row{display:flex;gap:6px;padding:0 8px 4px;flex-wrap:wrap}
+.qchip{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--paper2);border:none;border-radius:100px;padding:5px 12px;cursor:pointer;transition:all .15s;font-weight:500}
+.qchip:hover{background:var(--green-p);color:var(--green)}
+
+/* HERO RIGHT — dark panel */
+.hero-r{background:var(--ink);display:flex;flex-direction:column;justify-content:center;padding:64px;position:relative;overflow:hidden}
+.hero-r::before{content:'';position:absolute;top:-80px;right:-80px;width:320px;height:320px;border-radius:50%;background:rgba(34,201,122,.06)}
+.hero-r::after{content:'';position:absolute;bottom:-60px;left:-60px;width:220px;height:220px;border-radius:50%;background:rgba(232,160,32,.05)}
+.stat-main{background:rgba(255,255,255,.04);border:1px solid rgba(34,201,122,.2);border-radius:16px;padding:24px 28px;margin-bottom:14px;position:relative;z-index:1}
+.stat-ey{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px}
+.stat-n{font-family:var(--serif);font-size:52px;font-weight:700;color:var(--green-b);line-height:1;margin-bottom:6px;letter-spacing:-1px}
+.stat-d{font-size:13px;color:rgba(255,255,255,.5);line-height:1.5;margin-bottom:12px}
+.stat-tip{background:rgba(34,201,122,.1);border:1px solid rgba(34,201,122,.2);border-radius:8px;padding:10px 12px;font-size:12px;color:rgba(34,201,122,.85);line-height:1.55}
+.stat-src{margin-top:10px;font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.2);letter-spacing:.04em}
+.stat-src span{color:rgba(34,201,122,.55)}
+.stat-mini-row{display:flex;gap:10px;position:relative;z-index:1}
+.stat-mini{flex:1;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px}
+.stat-mini-n{font-family:var(--serif);font-size:22px;font-weight:700;color:#fff;margin-bottom:4px}
+.stat-mini-l{font-size:11px;color:rgba(255,255,255,.3);line-height:1.4}
+
+/* TICKER */
+.ticker{background:var(--ink);padding:11px 0;overflow:hidden;border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05)}
+.ticker-track{display:flex;animation:tick 32s linear infinite;white-space:nowrap}
+.ticker-item{display:inline-flex;align-items:center;gap:8px;padding:0 28px;font-family:var(--mono);font-size:11.5px;color:rgba(255,255,255,.35);border-right:1px solid rgba(255,255,255,.07)}
+.tv{color:var(--green-b);font-weight:500}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* FEATURES */
+.features{padding:96px 80px}
+.sec-hd{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:56px}
+.sec-tag{font-family:var(--mono);font-size:11px;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.sec-title{font-family:var(--serif);font-size:40px;line-height:1.15;letter-spacing:-.6px}
+.sec-title em{font-style:italic;color:var(--green)}
+.sec-sub{font-size:14px;color:var(--muted);max-width:240px;text-align:right;line-height:1.65}
+.feat-grid{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:auto auto;gap:14px}
+.fc{background:#fff;border-radius:20px;padding:28px;border:1px solid var(--border);cursor:pointer;transition:transform .2s,border-color .2s;position:relative;overflow:hidden}
+.fc:hover{transform:translateY(-3px);border-color:var(--green)}
+.fc.dark{background:var(--ink)}.fc.amb{background:var(--amber-p)}.fc.cor{background:var(--coral-p)}.fc.grn{background:var(--green-p)}
+.fc.sp2{grid-column:span 2}.fc.sr2{grid-row:span 2}
+.fc-n{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;margin-bottom:16px}
+.fc.dark .fc-n{color:rgba(255,255,255,.25)}
+.fc-ico{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:22px}
+.ico-ink{background:var(--ink)}.ico-g{background:var(--green)}.ico-a{background:var(--amber)}.ico-c{background:var(--coral)}
+.fc-title{font-family:var(--serif);font-size:20px;color:var(--ink);margin-bottom:8px;line-height:1.2}
+.fc.dark .fc-title{color:#fff}
+.fc.amb .fc-title{color:#7a4f10}.fc.cor .fc-title{color:#7a2e1e}.fc.grn .fc-title{color:#0f4028}
+.fc-desc{font-size:13px;color:var(--muted);line-height:1.65}
+.fc.dark .fc-desc{color:rgba(255,255,255,.4)}
+.fc.amb .fc-desc{color:#9a6520}.fc.cor .fc-desc{color:#8a3828}.fc.grn .fc-desc{color:#1a5e3a}
+.fc-big{font-family:var(--serif);font-size:52px;font-weight:700;color:var(--green-b);line-height:1;margin-top:16px}
+.fc-demo{margin-top:20px;background:rgba(255,255,255,.05);border-radius:10px;padding:14px;font-size:12.5px;line-height:1.6}
+.fc-demo .q{color:rgba(255,255,255,.35);font-style:italic;margin-bottom:6px}
+.fc-demo .a{color:var(--green-b);font-weight:500}
+
+/* HOW */
+.how{padding:80px;background:var(--ink);position:relative;overflow:hidden}
+.how::before{content:'FitBot';position:absolute;right:-10px;top:50%;transform:translateY(-50%);font-family:var(--serif);font-size:110px;font-weight:700;color:rgba(255,255,255,.03);white-space:nowrap;pointer-events:none}
+.how-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:56px;position:relative;z-index:1}
+.how-s{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);padding:32px 24px;position:relative;transition:background .2s}
+.how-s:hover{background:rgba(34,201,122,.05)}
+.how-s:first-child{border-radius:14px 0 0 14px}
+.how-s:last-child{border-radius:0 14px 14px 0}
+.how-n{font-family:var(--mono);font-size:10px;color:var(--green-b);letter-spacing:.08em;margin-bottom:16px}
+.how-t{font-family:var(--serif);font-size:18px;color:#fff;margin-bottom:10px;line-height:1.2}
+.how-d{font-size:13px;color:rgba(255,255,255,.38);line-height:1.6}
+.how-arr{position:absolute;top:50%;right:-1px;transform:translateY(-50%);width:18px;height:18px;background:var(--green);clip-path:polygon(0 0,65% 50%,0 100%);z-index:2}
+.how-s:last-child .how-arr{display:none}
+
+/* FOOTER */
+footer{background:var(--ink);padding:22px 80px;display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.25)}
+footer span{color:rgba(34,201,122,.55)}
+
+/* FADE IN */
+.fi{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease}
+.fi.vis{opacity:1;transform:none}
+
+/* ═══════════════════════════════════════════
+   PAGE 2: FITBOT CHAT
+═══════════════════════════════════════════ */
+.fitbot-layout{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 64px)}
+
+/* SIDEBAR */
+.fb-sidebar{background:var(--paper2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.fb-sidebar-top{padding:28px 24px 20px}
+.fb-brand{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.fb-brand-icon{width:38px;height:38px;background:var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.fb-brand-name{font-family:var(--serif);font-size:20px;color:var(--ink)}
+.fb-brand-name em{color:var(--green);font-style:normal}
+.fb-brand-sub{font-size:12px;color:var(--muted);margin-bottom:20px}
+.fb-status-row{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;color:var(--muted);padding:8px 12px;background:#fff;border-radius:8px;border:1px solid var(--border);margin-bottom:20px}
+.fb-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 2px rgba(74,222,128,.25);animation:fbdot 2s ease-in-out infinite}
+@keyframes fbdot{0%,100%{opacity:1}50%{opacity:.4}}
+.fb-divider{height:1px;background:var(--border);margin:0 24px 16px}
+.fb-sec-label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 24px;margin-bottom:10px}
+.fb-chips-stack{display:flex;flex-direction:column;gap:3px;padding:0 16px 20px}
+.fb-chip{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .15s;border:none;background:none;text-align:left;width:100%;font-family:var(--sans)}
+.fb-chip:hover{background:#fff;color:var(--ink)}
+.fb-chip-icon{font-size:14px;flex-shrink:0}
+.fb-hist-section{padding:0 16px 20px}
+.fb-hist-item{font-size:13px;color:var(--muted);padding:7px 10px;border-radius:7px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all .15s;margin-bottom:2px}
+.fb-hist-item:hover{background:#fff;color:var(--ink)}
+.fb-hist-item.active{background:#fff;color:var(--ink);font-weight:500}
+.fb-sidebar-footer{padding:20px 24px;border-top:1px solid var(--border);margin-top:auto}
+.fb-sidebar-footer p{font-size:12px;color:var(--muted);line-height:1.6}
+.fb-sidebar-footer strong{color:var(--ink)}
+
+/* MAIN */
+.fb-main{display:flex;flex-direction:column;height:calc(100vh - 64px);background:var(--paper)}
+.fb-topbar{padding:16px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:#fff}
+.fb-topbar-l{display:flex;align-items:center;gap:10px}
+.fb-topbar-icon{width:32px;height:32px;background:var(--green-p);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.fb-topbar-title{font-family:var(--serif);font-size:17px;font-style:italic;color:var(--ink)}
+.fb-topbar-sub{font-size:12px;color:var(--muted)}
+.fb-badge{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--green);background:var(--green-p);padding:5px 12px;border-radius:100px}
+.fb-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--green-b)}
+
+/* THREAD */
+.fb-thread{flex:1;overflow-y:auto;padding:24px 32px;display:flex;flex-direction:column;gap:16px;scroll-behavior:smooth}
+.fb-thread::-webkit-scrollbar{width:4px}
+.fb-thread::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.fb-msg{display:flex;gap:10px;max-width:80%;animation:fbmsg .22s ease-out}
+@keyframes fbmsg{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.fb-msg.user{align-self:flex-end;flex-direction:row-reverse}
+.fb-msg.bot{align-self:flex-start}
+.fb-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;background:var(--green-p);border:1px solid rgba(29,122,85,.15)}
+.fb-bubble{padding:12px 16px;line-height:1.65;font-size:14px;word-break:break-word}
+.fb-msg.bot .fb-bubble{background:#fff;border:1px solid var(--border);border-radius:4px 14px 14px 14px;color:var(--ink)}
+.fb-msg.user .fb-bubble{background:var(--ink);color:var(--paper);border-radius:14px 14px 4px 14px}
+.fb-bubble p{margin:0 0 8px}.fb-bubble p:last-child{margin:0}
+.fb-bubble ul,.fb-bubble ol{padding-left:18px;margin:6px 0}
+.fb-bubble li{margin:3px 0}
+.fb-bubble strong{font-weight:600}
+.fb-bubble code{background:var(--paper2);padding:1px 5px;border-radius:3px;font-size:12px;font-family:var(--mono)}
+
+/* Typing indicator */
+.fb-typing{display:flex;align-items:center;gap:4px;padding:12px 16px;background:#fff;border:1px solid var(--border);border-radius:4px 14px 14px 14px;width:fit-content}
+.fb-td{width:6px;height:6px;border-radius:50%;background:var(--green);animation:fbtype 1.2s ease-in-out infinite}
+.fb-td:nth-child(2){animation-delay:.2s}.fb-td:nth-child(3){animation-delay:.4s}
+@keyframes fbtype{0%,60%,100%{transform:translateY(0);opacity:.3}30%{transform:translateY(-6px);opacity:1}}
+
+/* WELCOME */
+.fb-welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;padding:40px 32px}
+.fb-welcome-icon{width:64px;height:64px;background:var(--green-p);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:20px;border:1px solid rgba(29,122,85,.12)}
+.fb-welcome-title{font-family:var(--serif);font-size:28px;color:var(--ink);margin-bottom:10px;line-height:1.2}
+.fb-welcome-title em{font-style:italic;color:var(--green)}
+.fb-welcome-sub{font-size:15px;color:var(--muted);max-width:380px;line-height:1.7;margin-bottom:28px}
+.fb-starter-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:500px;width:100%}
+.fb-starter{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;text-align:left;cursor:pointer;transition:all .15s;font-family:var(--sans);width:100%}
+.fb-starter:hover{border-color:var(--green);background:var(--green-p);transform:translateY(-2px)}
+.fb-starter-icon{font-size:20px;margin-bottom:8px}
+.fb-starter-q{font-size:13px;color:var(--ink);font-weight:500;margin-bottom:4px;line-height:1.4}
+.fb-starter-cat{font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:.05em;text-transform:uppercase}
+
+/* INPUT */
+.fb-input-wrap{padding:14px 32px 18px;border-top:1px solid var(--border);background:#fff;flex-shrink:0}
+#fb-file-preview{display:none;align-items:center;gap:8px;padding:7px 14px;background:var(--green-p);border-radius:8px;margin-bottom:10px;font-size:13px;color:var(--green);font-weight:500}
+#fb-file-preview.show{display:flex}
+#fb-remove-file{background:none;border:none;cursor:pointer;color:var(--green);font-size:14px;padding:0 4px;line-height:1}
+#fb-remove-file:hover{color:var(--coral)}
+.fb-input-row{display:flex;align-items:center;gap:8px;background:var(--paper);border:1.5px solid var(--border);border-radius:14px;padding:6px 8px 6px 14px;transition:border-color .2s,box-shadow .2s}
+.fb-input-row:focus-within{border-color:var(--green);box-shadow:0 0 0 3px rgba(29,122,85,.07);background:#fff}
+.fb-attach{width:32px;height:32px;border-radius:8px;border:none;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.fb-attach:hover{background:var(--paper2);color:var(--green)}
+#fb-user-input{flex:1;border:none;outline:none;font-family:var(--sans);font-size:14px;color:var(--ink);background:transparent;padding:4px 0}
+#fb-user-input::placeholder{color:#bbb}
+.fb-send{background:var(--ink);color:var(--paper);border:none;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:background .18s;flex-shrink:0;display:flex;align-items:center;gap:6px}
+.fb-send:hover{background:var(--green)}
+.fb-send:active{transform:scale(.97)}
+.fb-note{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;margin-top:8px}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media(max-width:1024px){
+  nav{padding:0 24px}
+  .hero-l{padding:48px 36px}
+  .hero-r{padding:40px 36px}
+  .features{padding:64px 36px}
+  .how{padding:56px 36px}
+  .how-steps{grid-template-columns:1fr 1fr;gap:2px}
+  .how-s:first-child{border-radius:14px 0 0 0}
+  .how-s:nth-child(2){border-radius:0 14px 0 0}
+  .how-s:nth-child(3){border-radius:0 0 0 14px}
+  .how-s:last-child{border-radius:0 0 14px 0}
+  .how-s:nth-child(2) .how-arr,.how-s:nth-child(3) .how-arr,.how-s:last-child .how-arr{display:none}
+  footer{padding:18px 36px}
+}
+
+@media(max-width:768px){
+  nav{padding:0 20px;height:56px}
+  .nav-links,.nav-cta{display:none}
+  .nav-hamburger{display:flex}
+  .page{padding-top:56px}
+  .nav-mobile-menu{top:56px}
+  .hero{grid-template-columns:1fr;min-height:auto}
+  .hero-l{padding:36px 20px 32px;min-height:auto}
+  .hero-r{display:none}
+  .features{padding:40px 20px}
+  .sec-hd{flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:32px}
+  .sec-sub{text-align:left;max-width:100%}
+  .sec-title{font-size:28px}
+  .feat-grid{grid-template-columns:1fr}
+  .fc.sr2,.fc.sp2{grid-column:span 1;grid-row:span 1}
+  .fc{padding:20px}
+  .how{padding:40px 20px}
+  .how-steps{grid-template-columns:1fr;gap:2px}
+  .how-s{border-radius:0!important}
+  .how-s:first-child{border-radius:14px 14px 0 0!important}
+  .how-s:last-child{border-radius:0 0 14px 14px!important}
+  .how-arr{display:none!important}
+  footer{padding:16px 20px;flex-direction:column;gap:6px;text-align:center}
+  .fitbot-layout{grid-template-columns:1fr}
+  .fb-sidebar{display:none}
+  .fb-main{height:calc(100vh - 56px)}
+  .fb-topbar{padding:12px 16px;flex-wrap:wrap;gap:6px}
+  .fb-topbar-sub{display:none}
+  .fb-thread{padding:14px}
+  .fb-msg{max-width:92%}
+  .fb-input-wrap{padding:10px 14px 14px}
+  .fb-welcome{padding:24px 16px}
+  .fb-starter-grid{grid-template-columns:1fr}
+}
+
+@media(max-width:480px){
+  .hero-l h1{font-size:30px}
+  .chip-row{gap:5px}
+  .qchip{font-size:10px;padding:4px 10px}
+}
+</style>
 </head>
 <body>
-  <div class="app-wrapper">
-    <div class="container">
-      
-      <header class="app-header">
-        <div class="avatar">🤖</div>
-        <div class="header-text">
-            <h1>FitBot</h1>
-            <p>Konsultan Nutrisi & Kebugaran AI</p>
+
+<!-- NAV -->
+<nav>
+  <div class="logo" onclick="goto('landing')">
+    <div class="logo-icon">💪</div>
+    <div class="logo-text">Fit<em>Bot</em></div>
+  </div>
+  <ul class="nav-links">
+    <li onclick="goto('landing')" id="nl-landing" class="active">Beranda</li>
+    <li onclick="goto('fitbot')" id="nl-fitbot">Mulai Chat</li>
+    <li onclick="scrollToSection('how-section')">Cara Kerja</li>
+    <li onclick="scrollToSection('fitur-section')">Fitur</li>
+  </ul>
+  <button class="nav-cta" onclick="goto('fitbot')">Coba Gratis &rarr;</button>
+  <button class="nav-hamburger" id="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="nav-mobile-menu" id="mobile-menu">
+  <div class="nav-mobile-item active" id="nm-landing" onclick="gotoMobile('landing')">Beranda</div>
+  <div class="nav-mobile-item" id="nm-fitbot" onclick="gotoMobile('fitbot')">Mulai Chat</div>
+  <button class="nav-mobile-cta" onclick="gotoMobile('fitbot')">Coba Gratis &rarr;</button>
+</div>
+
+<!-- ═══ PAGE: LANDING ═══ -->
+<div class="page active" id="page-landing">
+
+  <section class="hero">
+    <div class="hero-l">
+      <div class="eyebrow"><div class="eyebrow-dot"></div>AI Nutrisi &middot; Berbasis Sains</div>
+      <h1>Diet &amp; olahraga,<br>dijelaskan<br><span class="hl"><em>dengan mudah</em></span></h1>
+      <p class="hero-desc">Tanya apa saja tentang kalori, nutrisi, dan kebugaran dalam bahasa sehari-hari. FitBot menjawab berdasarkan ilmu gizi — bukan mitos atau tren sesaat.</p>
+      <div class="hero-search-box">
+        <div class="hero-search-row">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4" stroke="#1a1814" stroke-width="1.5"/><path d="M10 10L13.5 13.5" stroke="#1a1814" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input type="text" placeholder="Contoh: berapa kalori nasi padang satu porsi?" id="hero-search">
+          <button class="hero-search-btn" onclick="sendHeroSearch()">Tanya &rarr;</button>
         </div>
-      </header>
-
-      <div id="chat-box" class="chat-box">
-          <div class="message bot">
-              Halo! Saya FitBot 💪. Ada yang bisa saya bantu terkait diet, nutrisi, atau jadwal workout kamu hari ini?
-          </div>
+        <div class="chip-row">
+          <button class="qchip" onclick="fbQuickPrompt('Berapa kalori yang saya butuhkan per hari?')">Hitung kalori harian</button>
+          <button class="qchip" onclick="fbQuickPrompt('Menu makan sehat 1500 kalori sehari.')">Menu 1500 kal</button>
+          <button class="qchip" onclick="fbQuickPrompt('Jadwal workout pemula 3x seminggu.')">Workout pemula</button>
+          <button class="qchip" onclick="fbQuickPrompt('Tips intermittent fasting untuk pemula.')">Intermittent Fasting</button>
+        </div>
       </div>
-      
-      <div id="file-preview-container" class="hidden">
-          <span id="file-name">📁 document.pdf</span>
-          <button id="remove-file-btn" type="button" title="Batal">✖</button>
+    </div>
+    <div class="hero-r">
+      <div class="stat-main fi">
+        <div class="stat-ey">Contoh jawaban FitBot &middot; Kalori Harian</div>
+        <div class="stat-n">2.100</div>
+        <div class="stat-d">Kebutuhan kalori harian rata-rata pria dewasa aktif usia 25–35 tahun.</div>
+        <div class="stat-tip">💡 <strong>Tips:</strong> Bagi dalam 3 kali makan utama + 2 camilan sehat. Jangan kurangi drastis lebih dari 500 kal/hari.</div>
+        <div class="stat-src">Berdasarkan: <span>Pedoman Gizi Seimbang Kemenkes RI</span></div>
       </div>
+      <div class="stat-mini-row">
+        <div class="stat-mini fi"><div class="stat-mini-n">30g</div><div class="stat-mini-l">Serat harian yang disarankan</div></div>
+        <div class="stat-mini fi"><div class="stat-mini-n">0,8g</div><div class="stat-mini-l">Protein per kg berat badan</div></div>
+        <div class="stat-mini fi"><div class="stat-mini-n">8gls</div><div class="stat-mini-l">Air putih per hari</div></div>
+      </div>
+    </div>
+  </section>
 
-      <form id="chat-form">
-        <input type="file" id="file-input" accept="image/*,audio/*,.pdf,.doc,.docx,.txt" hidden />
-        <button type="button" id="attach-btn" title="Lampirkan foto/dokumen">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
-        </button>
-        
-        <input type="text" id="user-input" placeholder="Tanya soal kalori, workout, dll..." autocomplete="off" />
-        
-        <button type="submit" id="send-btn" title="Kirim">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-        </button>
-      </form>
-      
+  <!-- TICKER: tips kesehatan -->
+  <div class="ticker">
+    <div class="ticker-track">
+      <span class="ticker-item">Protein 🥩 <span class="tv">0,8–1,2g per kg BB</span></span>
+      <span class="ticker-item">Kalori nasi 1 centong <span class="tv">~135 kal</span></span>
+      <span class="ticker-item">Target langkah harian <span class="tv">8.000–10.000 langkah</span></span>
+      <span class="ticker-item">Tidur optimal <span class="tv">7–9 jam/malam</span></span>
+      <span class="ticker-item">Kalori dibakar jogging 30 menit <span class="tv">~300 kal</span></span>
+      <span class="ticker-item">Air putih harian <span class="tv">2–2,5 liter</span></span>
+      <span class="ticker-item">BMI normal <span class="tv">18,5 – 24,9</span></span>
+      <span class="ticker-item">Serat harian <span class="tv">25–38 gram</span></span>
+      <span class="ticker-item">Protein 🥩 <span class="tv">0,8–1,2g per kg BB</span></span>
+      <span class="ticker-item">Kalori nasi 1 centong <span class="tv">~135 kal</span></span>
+      <span class="ticker-item">Target langkah harian <span class="tv">8.000–10.000 langkah</span></span>
+      <span class="ticker-item">Tidur optimal <span class="tv">7–9 jam/malam</span></span>
+      <span class="ticker-item">Kalori dibakar jogging 30 menit <span class="tv">~300 kal</span></span>
+      <span class="ticker-item">Air putih harian <span class="tv">2–2,5 liter</span></span>
+      <span class="ticker-item">BMI normal <span class="tv">18,5 – 24,9</span></span>
+      <span class="ticker-item">Serat harian <span class="tv">25–38 gram</span></span>
     </div>
   </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
 
-  <script src="script.js"></script>
+  <!-- FITUR -->
+  <section class="features fi" id="fitur-section">
+    <div class="sec-hd">
+      <div><div class="sec-tag">Fitur utama</div><div class="sec-title">Semua yang kamu butuhkan<br>untuk <em>hidup lebih sehat</em></div></div>
+      <div class="sec-sub">Enam kemampuan FitBot untuk bantu perjalanan kesehatanmu.</div>
+    </div>
+    <div class="feat-grid">
+      <div class="fc dark sr2" onclick="goto('fitbot')">
+        <div class="fc-n">01 &mdash; Fitur utama</div>
+        <div class="fc-ico ico-ink" style="font-size:22px">🥗</div>
+        <div class="fc-title" style="color:#fff;font-size:26px;">Tanya dalam<br>bahasa sehari-hari</div>
+        <div class="fc-desc">Tidak perlu jadi ahli gizi. Cukup ketik pertanyaanmu seperti ngobrol dengan teman yang kebetulan ahli nutrisi.</div>
+        <div class="fc-demo"><div class="q">"apakah nasi putih bikin gemuk?"</div><div class="a">Nasi putih sendiri tidak menyebabkan gemuk. Yang memengaruhi berat badan adalah total kalori harian dibanding kalori yang kamu bakar...</div></div>
+        <div class="fc-big">50+<br><span style="font-size:15px;font-family:var(--sans);font-weight:400;color:rgba(255,255,255,.3);">topik gizi &amp; olahraga</span></div>
+      </div>
+      <div class="fc amb" onclick="goto('fitbot')">
+        <div class="fc-n" style="color:#c8850a;">02</div>
+        <div class="fc-ico ico-a" style="font-size:20px">🔥</div>
+        <div class="fc-title">Hitung kalori &amp; makro</div>
+        <div class="fc-desc">Kalori harian, protein, karbohidrat, lemak — dihitung sesuai berat badan dan tujuanmu.</div>
+      </div>
+      <div class="fc grn" onclick="goto('fitbot')">
+        <div class="fc-n" style="color:#1a6040;">03</div>
+        <div class="fc-ico ico-g" style="font-size:20px">🏋️</div>
+        <div class="fc-title">Rencana workout</div>
+        <div class="fc-desc">Program latihan disesuaikan level dan waktu yang kamu punya — dari pemula hingga lanjutan.</div>
+      </div>
+      <div class="fc cor sp2" onclick="goto('fitbot')">
+        <div class="fc-n" style="color:#b84a32;">04 &mdash; Fitur spesial</div>
+        <div style="display:flex;gap:28px;align-items:flex-start">
+          <div style="flex:1">
+            <div class="fc-ico ico-c" style="font-size:20px">🔍</div>
+            <div class="fc-title">Luruskan mitos kesehatan</div>
+            <div class="fc-desc">Banyak informasi diet beredar yang salah. FitBot meluruskan dengan penjelasan berbasis bukti ilmiah.</div>
+          </div>
+          <div style="flex:1;background:#fff;border-radius:10px;padding:14px;font-size:12px">
+            <div style="color:#999;font-style:italic;margin-bottom:8px">"makan malam bikin gemuk?"</div>
+            <div style="background:#fee2e2;border-radius:6px;padding:7px 10px;color:#991b1b;font-size:11.5px"><strong>Mitos.</strong> Waktu makan tidak langsung memengaruhi berat badan. Yang penting adalah total kalori harian, bukan jamnya.</div>
+          </div>
+        </div>
+      </div>
+      <div class="fc" onclick="goto('fitbot')">
+        <div class="fc-n">05</div>
+        <div class="fc-ico" style="background:var(--paper2);font-size:20px">📸</div>
+        <div class="fc-title">Analisis foto makanan</div>
+        <div class="fc-desc">Kirim foto makananmu dan FitBot akan mengestimasi kandungan gizinya.</div>
+      </div>
+      <div class="fc dark" onclick="goto('fitbot')">
+        <div class="fc-n" style="color:rgba(255,255,255,.25);">06</div>
+        <div class="fc-ico" style="background:rgba(255,255,255,.1);font-size:20px">📄</div>
+        <div class="fc-title" style="color:#fff;font-size:17px;">Analisis dokumen</div>
+        <div class="fc-desc" style="color:rgba(255,255,255,.4);font-size:13px;">Upload hasil lab atau dokumen medismu untuk penjelasan yang mudah dipahami.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CARA KERJA -->
+  <section class="how fi" id="how-section">
+    <div class="sec-tag" style="color:var(--green-b)">Cara kerja</div>
+    <div class="sec-title" style="color:#fff;margin-top:10px">Dari pertanyaan ke jawaban<br><em style="color:var(--green-b)">yang bisa kamu percaya</em></div>
+    <div class="how-steps">
+      <div class="how-s">
+        <div class="how-n">01 &mdash;</div>
+        <div class="how-t">Tanya apa saja</div>
+        <div class="how-d">Pakai bahasa sehari-hari tentang diet, olahraga, atau nutrisi. Tidak perlu istilah medis.</div>
+        <div class="how-arr"></div>
+      </div>
+      <div class="how-s">
+        <div class="how-n">02 &mdash;</div>
+        <div class="how-t">AI proses pertanyaanmu</div>
+        <div class="how-d">FitBot menganalisis pertanyaan dan mengacu pada pedoman gizi dan penelitian terkini.</div>
+        <div class="how-arr"></div>
+      </div>
+      <div class="how-s">
+        <div class="how-n">03 &mdash;</div>
+        <div class="how-t">Jawaban + penjelasan</div>
+        <div class="how-d">Bukan cuma angka — kamu dapat penjelasan konteks, tips praktis, dan peringatan jika perlu.</div>
+        <div class="how-arr"></div>
+      </div>
+      <div class="how-s">
+        <div class="how-n">04 &mdash;</div>
+        <div class="how-t">Tanya lanjutan bebas</div>
+        <div class="how-d">Chat berjalan berkesinambungan — FitBot ingat konteks percakapan sebelumnya.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div>Fit<em style="color:rgba(34,201,122,.55)">Bot</em> &mdash; Konsultan Nutrisi &amp; Kebugaran AI</div>
+    <div>Informasi umum berbasis sains &middot; <span>Bukan pengganti tenaga medis profesional</span></div>
+  </footer>
+</div>
+
+<!-- ═══ PAGE: FITBOT CHAT ═══ -->
+<div class="page" id="page-fitbot">
+  <div class="fitbot-layout">
+
+    <!-- SIDEBAR -->
+    <div class="fb-sidebar">
+      <div class="fb-sidebar-top">
+        <div class="fb-brand">
+          <div class="fb-brand-icon">💪</div>
+          <div class="fb-brand-name">Fit<em>Bot</em></div>
+        </div>
+        <div class="fb-brand-sub">Konsultan Nutrisi &amp; Kebugaran AI</div>
+        <div class="fb-status-row">
+          <div class="fb-dot"></div>
+          <span>AI aktif &mdash; siap membantu</span>
+        </div>
+      </div>
+      <div class="fb-divider"></div>
+      <div class="fb-sec-label">Topik cepat</div>
+      <div class="fb-chips-stack">
+        <button class="fb-chip" onclick="fbQuickPrompt('Makanan tinggi protein yang bagus untuk diet?')"><span class="fb-chip-icon">🥩</span>Makanan Protein</button>
+        <button class="fb-chip" onclick="fbQuickPrompt('Rekomendasikan jadwal workout untuk pemula 3x seminggu.')"><span class="fb-chip-icon">🏋️</span>Jadwal Workout</button>
+        <button class="fb-chip" onclick="fbQuickPrompt('Berapa kalori yang saya butuhkan per hari?')"><span class="fb-chip-icon">🔥</span>Hitung Kalori</button>
+        <button class="fb-chip" onclick="fbQuickPrompt('Tips intermittent fasting untuk pemula.')"><span class="fb-chip-icon">⏱️</span>Intermittent Fasting</button>
+        <button class="fb-chip" onclick="fbQuickPrompt('Jelaskan makro nutrisi: karbohidrat, protein, lemak.')"><span class="fb-chip-icon">📊</span>Makro Nutrisi</button>
+        <button class="fb-chip" onclick="fbQuickPrompt('Cara menurunkan berat badan yang sehat dan aman.')"><span class="fb-chip-icon">⚖️</span>Turun Berat Badan</button>
+        <button class="fb-chip" onclick="fbQuickPrompt('Apa manfaat olahraga kardio dan berapa lama idealnya?')"><span class="fb-chip-icon">🏃</span>Olahraga Kardio</button>
+        <button class="fb-chip" onclick="fbQuickPrompt('Makanan apa yang bagus dikonsumsi sebelum dan sesudah olahraga?')"><span class="fb-chip-icon">🍌</span>Nutrisi Pre/Post Workout</button>
+      </div>
+      <div class="fb-divider"></div>
+      <div class="fb-sec-label">Riwayat obrolan</div>
+      <div class="fb-hist-section" id="fb-history-list">
+        <div class="fb-hist-item active">Sesi baru</div>
+      </div>
+      <div class="fb-sidebar-footer">
+        <p>FitBot memberikan saran umum berbasis ilmu gizi dan kebugaran. <strong>Konsultasikan kondisi medis khusus ke tenaga kesehatan profesional.</strong></p>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="fb-main">
+      <div class="fb-topbar">
+        <div class="fb-topbar-l">
+          <div class="fb-topbar-icon">💪</div>
+          <div>
+            <div class="fb-topbar-title">FitBot &mdash; Konsultan Nutrisi &amp; Kebugaran</div>
+            <div class="fb-topbar-sub">Berbasis AI &middot; Didukung ilmu gizi terkini</div>
+          </div>
+        </div>
+        <div class="fb-badge"><div class="fb-badge-dot"></div>AI aktif</div>
+      </div>
+
+      <div class="fb-welcome" id="fb-welcome">
+        <div class="fb-welcome-icon">🥗</div>
+        <div class="fb-welcome-title">Halo! Saya <em>FitBot</em></div>
+        <div class="fb-welcome-sub">Tanya apa saja seputar diet, nutrisi, dan jadwal workout. Saya jawab dengan energi dan sains — bukan sekadar motivasi kosong.</div>
+        <div class="fb-starter-grid">
+          <button class="fb-starter" onclick="fbQuickPrompt('Menu makan sehari untuk diet sehat 1500 kalori.')">
+            <div class="fb-starter-icon">🍽️</div>
+            <div class="fb-starter-q">Menu makan harian 1500 kalori</div>
+            <div class="fb-starter-cat">Diet &middot; Nutrisi</div>
+          </button>
+          <button class="fb-starter" onclick="fbQuickPrompt('Program workout untuk pemula yang bisa dilakukan di rumah.')">
+            <div class="fb-starter-icon">🏠</div>
+            <div class="fb-starter-q">Workout di rumah untuk pemula</div>
+            <div class="fb-starter-cat">Latihan &middot; Kebugaran</div>
+          </button>
+          <button class="fb-starter" onclick="fbQuickPrompt('Apakah intermittent fasting cocok untuk semua orang?')">
+            <div class="fb-starter-icon">⏱️</div>
+            <div class="fb-starter-q">Cocok tidak intermittent fasting?</div>
+            <div class="fb-starter-cat">Diet &middot; IF</div>
+          </button>
+          <button class="fb-starter" onclick="fbQuickPrompt('Berapa gram protein yang ideal per hari untuk membangun otot?')">
+            <div class="fb-starter-icon">💪</div>
+            <div class="fb-starter-q">Kebutuhan protein untuk otot</div>
+            <div class="fb-starter-cat">Nutrisi &middot; Otot</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="fb-thread" id="fb-thread" style="display:none"></div>
+
+      <div class="fb-input-wrap">
+        <div id="fb-file-preview">
+          <span id="fb-file-name">📁 file.pdf</span>
+          <button id="fb-remove-file" type="button">✖</button>
+        </div>
+        <div class="fb-input-row">
+          <input type="file" id="fb-file-input" accept="image/*,audio/*,.pdf,.doc,.docx,.txt" hidden />
+          <button class="fb-attach" type="button" id="fb-attach-btn" title="Lampirkan file">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          </button>
+          <input type="text" id="fb-user-input" placeholder="Tanya soal kalori, workout, menu diet..." autocomplete="off" />
+          <button class="fb-send" id="fb-send-btn" type="button">
+            Kirim
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <div class="fb-note">FitBot memberikan informasi umum &mdash; bukan pengganti dokter atau ahli gizi bersertifikat</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+<script>
+/* ── PAGE ROUTING ── */
+const pages = {landing:'page-landing', fitbot:'page-fitbot'};
+const navIds = {landing:'nl-landing', fitbot:'nl-fitbot'};
+const mobileIds = {landing:'nm-landing', fitbot:'nm-fitbot'};
+
+function goto(key){
+  Object.values(pages).forEach(id => document.getElementById(id).classList.remove('active'));
+  document.getElementById(pages[key]).classList.add('active');
+  Object.values(navIds).forEach(id => { const el=document.getElementById(id); if(el) el.classList.remove('active'); });
+  const nav = document.getElementById(navIds[key]); if(nav) nav.classList.add('active');
+  Object.values(mobileIds).forEach(id => { const el=document.getElementById(id); if(el) el.classList.remove('active'); });
+  const mob = document.getElementById(mobileIds[key]); if(mob) mob.classList.add('active');
+  window.scrollTo(0,0);
+  setTimeout(observe, 50);
+}
+
+function gotoMobile(key){ closeMenu(); goto(key); }
+function toggleMenu(){
+  const menu=document.getElementById('mobile-menu'), btn=document.getElementById('hamburger');
+  menu.classList.contains('open') ? closeMenu() : (menu.classList.add('open'), btn.classList.add('open'));
+}
+function closeMenu(){
+  document.getElementById('mobile-menu').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+}
+function scrollToSection(id){
+  goto('landing');
+  setTimeout(()=>{ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }, 100);
+}
+
+/* ── FADE IN ── */
+function observe(){
+  const io = new IntersectionObserver(entries=>{
+    entries.forEach((e,i)=>{ if(e.isIntersecting) setTimeout(()=>e.target.classList.add('vis'),i*80); });
+  },{threshold:.08});
+  const active = document.querySelector('.page.active');
+  if(active) active.querySelectorAll('.fi').forEach(el=>{ if(!el.classList.contains('vis')) io.observe(el); });
+}
+observe();
+
+/* ── HERO SEARCH ── */
+function sendHeroSearch(){
+  const q = document.getElementById('hero-search').value.trim();
+  if(q) fbQuickPrompt(q);
+}
+document.getElementById('hero-search').addEventListener('keydown', e=>{ if(e.key==='Enter') sendHeroSearch(); });
+
+/* ── FITBOT LOGIC ── */
+(function(){
+  const thread   = document.getElementById('fb-thread');
+  const welcome  = document.getElementById('fb-welcome');
+  const input    = document.getElementById('fb-user-input');
+  const sendBtn  = document.getElementById('fb-send-btn');
+  const attachBtn= document.getElementById('fb-attach-btn');
+  const fileInput= document.getElementById('fb-file-input');
+  const filePrev = document.getElementById('fb-file-preview');
+  const fileName = document.getElementById('fb-file-name');
+  const removeFile=document.getElementById('fb-remove-file');
+  const histList = document.getElementById('fb-history-list');
+
+  let conversationHistory = [];
+  let selectedFile = null;
+  let sessionStarted = false;
+
+  const SYSTEM_PROMPT = `Kamu adalah FitBot, konsultan nutrisi dan pelatih kebugaran profesional yang ramah dan berpengetahuan luas.
+Tugasmu HANYA menjawab pertanyaan seputar diet, nutrisi, olahraga, kebugaran, dan gaya hidup sehat.
+Gunakan nada yang memotivasi, ramah, dan berdasarkan sains. Boleh gunakan emoji secukupnya.
+Format jawaban dengan baik menggunakan paragraf, poin-poin jika perlu, dan penjelasan yang jelas.
+Jika ditanya di luar topik kesehatan/kebugaran, tolak dengan sopan dan arahkan ke topik kesehatan.
+Jawab selalu dalam Bahasa Indonesia.`;
+
+  function showThread(){
+    welcome.style.display = 'none';
+    thread.style.display  = 'flex';
+  }
+
+  function appendMsg(role, content, id){
+    showThread();
+    const msg = document.createElement('div');
+    msg.classList.add('fb-msg', role==='user' ? 'user' : 'bot');
+    if(id) msg.id = id;
+    if(role === 'bot'){
+      const av  = document.createElement('div'); av.className = 'fb-avatar'; av.textContent = '🤖';
+      const bub = document.createElement('div'); bub.className = 'fb-bubble';
+      bub.innerHTML = id
+        ? '<div class="fb-typing"><div class="fb-td"></div><div class="fb-td"></div><div class="fb-td"></div></div>'
+        : content;
+      msg.appendChild(av); msg.appendChild(bub);
+    } else {
+      const bub = document.createElement('div'); bub.className = 'fb-bubble';
+      bub.textContent = content;
+      msg.appendChild(bub);
+    }
+    thread.appendChild(msg);
+    thread.scrollTop = thread.scrollHeight;
+  }
+
+  function updateMsg(id, html){
+    const el = document.getElementById(id); if(!el) return;
+    const bub = el.querySelector('.fb-bubble'); if(bub) bub.innerHTML = html;
+    thread.scrollTop = thread.scrollHeight;
+  }
+
+  function addHistory(text){
+    if(sessionStarted) return;
+    sessionStarted = true;
+    const label = text.length > 42 ? text.substring(0,42)+'…' : text;
+    const first = histList.querySelector('.fb-hist-item.active');
+    if(first && first.textContent === 'Sesi baru'){
+      first.textContent = label;
+    } else {
+      const item = document.createElement('div');
+      item.className = 'fb-hist-item active';
+      item.textContent = label;
+      document.querySelectorAll('.fb-hist-item').forEach(i=>i.classList.remove('active'));
+      histList.insertBefore(item, histList.firstChild);
+    }
+  }
+
+  async function send(){
+    const text = input.value.trim();
+    if(!text && !selectedFile) return;
+
+    const displayText = selectedFile ? `[File: ${selectedFile.name}] ${text||''}` : text;
+    appendMsg('user', displayText);
+    input.value = '';
+    addHistory(text || selectedFile.name);
+    filePrev.classList.remove('show');
+
+    const loadId = 'fb-load-' + Date.now();
+    appendMsg('bot', '', loadId);
+
+    try {
+      let responseText = '';
+
+      if(selectedFile){
+        const fd = new FormData();
+        fd.append('prompt', (text||'Tolong jelaskan file ini dalam konteks kesehatan dan nutrisi.') + '\nJawab sebagai konsultan nutrisi dan kebugaran dalam Bahasa Indonesia.');
+        let endpoint = '';
+        if(selectedFile.type.startsWith('image/'))      { endpoint='/generate-from-image';    fd.append('image',selectedFile); }
+        else if(selectedFile.type.startsWith('audio/')) { endpoint='/generate-from-audio';    fd.append('audio',selectedFile); }
+        else                                             { endpoint='/generate-from-document'; fd.append('document',selectedFile); }
+        const res  = await fetch('http://localhost:3000'+endpoint, {method:'POST',body:fd});
+        const data = await res.json();
+        responseText = data.result || data.message || 'Maaf, terjadi kesalahan.';
+        selectedFile = null; fileInput.value = '';
+      } else {
+        conversationHistory.push({role:'user', text});
+        const res  = await fetch('http://localhost:3000/api/chat',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ conversation: conversationHistory, system: SYSTEM_PROMPT })
+        });
+        const data = await res.json();
+        responseText = data.result || data.error || 'Maaf, terjadi kesalahan.';
+        conversationHistory.push({role:'model', text:responseText});
+      }
+
+      const html = typeof DOMPurify !== 'undefined'
+        ? DOMPurify.sanitize(typeof marked !== 'undefined' ? marked.parse(responseText) : responseText)
+        : responseText;
+      updateMsg(loadId, html);
+
+    } catch(err){
+      updateMsg(loadId, '⚠️ Terjadi kesalahan jaringan. Pastikan server berjalan di <code>localhost:3000</code>.');
+      console.error(err);
+    }
+  }
+
+  sendBtn.addEventListener('click', send);
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); send(); } });
+  attachBtn.addEventListener('click', ()=>fileInput.click());
+  fileInput.addEventListener('change', e=>{
+    if(e.target.files.length){
+      selectedFile = e.target.files[0];
+      fileName.textContent = '📁 ' + selectedFile.name;
+      filePrev.classList.add('show');
+    }
+  });
+  removeFile.addEventListener('click', ()=>{
+    selectedFile=null; fileInput.value=''; filePrev.classList.remove('show');
+  });
+
+  window.fbQuickPrompt = function(prompt){
+    goto('fitbot');
+    setTimeout(()=>{ input.value=prompt; send(); }, 120);
+  };
+})();
+</script>
 </body>
 </html>
