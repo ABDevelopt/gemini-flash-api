@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FitBot - AI Health Coach</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="app-wrapper">
+    <div class="container">
+      
+      <header class="app-header">
+        <div class="avatar">🤖</div>
+        <div class="header-text">
+            <h1>FitBot</h1>
+            <p>Konsultan Nutrisi & Kebugaran AI</p>
+        </div>
+      </header>
+
+      <div id="chat-box" class="chat-box">
+          <div class="message bot">
+              Halo! Saya FitBot 💪. Ada yang bisa saya bantu terkait diet, nutrisi, atau jadwal workout kamu hari ini?
+          </div>
+      </div>
+      
+      <div id="file-preview-container" class="hidden">
+          <span id="file-name">📁 document.pdf</span>
+          <button id="remove-file-btn" type="button" title="Batal">✖</button>
+      </div>
+
+      <form id="chat-form">
+        <input type="file" id="file-input" accept="image/*,audio/*,.pdf,.doc,.docx,.txt" hidden />
+        <button type="button" id="attach-btn" title="Lampirkan foto/dokumen">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+        </button>
+        
+        <input type="text" id="user-input" placeholder="Tanya soal kalori, workout, dll..." autocomplete="off" />
+        
+        <button type="submit" id="send-btn" title="Kirim">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        </button>
+      </form>
+      
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+
+  <script src="script.js"></script>
+</body>
+</html>
